@@ -31,6 +31,17 @@ public class User {
     @Enumerated(EnumType.STRING)
     private AuthoritiesType authorityName = AuthoritiesType.ROLE_USER;
 
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public AuthoritiesType getAuthorityName() {
+        return authorityName;
+    }
 
     public SignupResponse toResponse() {
         return new SignupResponse(
