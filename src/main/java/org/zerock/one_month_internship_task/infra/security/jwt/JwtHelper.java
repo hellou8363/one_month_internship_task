@@ -5,7 +5,6 @@ import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -18,7 +17,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 
 @Component
@@ -36,10 +34,12 @@ public class JwtHelper {
     public Boolean validateToken(String token) {
         try {
             Jwts
-                    .parserBuilder()
-                    .setSigningKey(token)
+                    .parser()
+                    .verifyWith(
+                            Keys.hmacShaKeyFor(secretKey.getBytes())
+                    )
                     .build()
-                    .parseClaimsJws(token);
+                    .parseSignedClaims(token);
 
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
@@ -70,10 +70,10 @@ public class JwtHelper {
 
         return Jwts
                 .builder()
-                .setSubject(subject)
-                .setIssuer(issuer)
-                .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(now.plus(expirationPeriod)))
+                .subject(subject)
+                .issuer(issuer)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plus(expirationPeriod)))
                 .claim("authorities", Map.of("role", role))
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
@@ -81,17 +81,22 @@ public class JwtHelper {
 
     public UserPrincipal getAuthentication(String token) {
         Claims claims = Jwts
-                .parserBuilder()
-                .setSigningKey(secretKey)
+                .parser()
+                .verifyWith(
+                        Keys.hmacShaKeyFor(secretKey.getBytes())
+                )
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
 
         Collection<? extends GrantedAuthority> authorities =
                 Arrays.stream(claims.get("authorities").toString().split(","))
                         .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
+                        .toList();
 
-        return (UserPrincipal) new UsernamePasswordAuthenticationToken(claims.getSubject(), "", authorities).getPrincipal();
+        return new UserPrincipal(
+                claims.getSubject(),
+                (Collection<GrantedAuthority>) authorities
+        );
     }
 }
