@@ -1,20 +1,16 @@
 package org.zerock.one_month_internship_task.jwt;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.zerock.one_month_internship_task.domain.user.dto.type.AuthoritiesType;
 import org.zerock.one_month_internship_task.infra.security.jwt.JwtHelper;
 
-import java.time.Duration;
-
 import static org.springframework.test.util.AssertionErrors.*;
 
+@TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})
 @SpringBootTest
-@TestPropertySource(locations = "classpath:application-test.yml")
 public class JwtTests {
 
     @Autowired
@@ -22,7 +18,7 @@ public class JwtTests {
 
 
     @Test
-    void generateTokenTest() {
+    void generateAccessTokenTest() {
         String token = jwtHelper.generateAccessToken(
                 "TestUser",
                 AuthoritiesType.ROLE_USER
@@ -33,15 +29,39 @@ public class JwtTests {
     }
 
     @Test
-    void validateTokenTest() throws InterruptedException {
-        String token = jwtHelper.generateToken(
+    void validateAccessTokenTest() throws InterruptedException {
+        String token = jwtHelper.generateAccessToken(
                 "TestUser",
-                AuthoritiesType.ROLE_USER,
-                Duration.ofSeconds(3)
+                AuthoritiesType.ROLE_USER
         );
 
         assertNotNull("token is null", token);
+        assertTrue("fail validate token", jwtHelper.validateToken(token));
         Thread.sleep(3000);
-        assertFalse("token", jwtHelper.validateToken(token));
+        assertFalse("fail validate token", jwtHelper.validateToken(token));
+    }
+
+    @Test
+    void generateRefreshTokenTest() {
+        String token = jwtHelper.generateRefreshToken(
+                "TestUser",
+                AuthoritiesType.ROLE_USER
+        );
+
+        assertNotNull("token is null", token);
+        assertTrue("fail validate token", jwtHelper.validateToken(token));
+    }
+
+    @Test
+    void validateRefreshTokenTest() throws InterruptedException {
+        String token = jwtHelper.generateRefreshToken(
+                "TestUser",
+                AuthoritiesType.ROLE_USER
+        );
+
+        assertNotNull("token is null", token);
+        assertTrue("fail validate token", jwtHelper.validateToken(token));
+        Thread.sleep(3000);
+        assertFalse("fail validate token", jwtHelper.validateToken(token));
     }
 }
