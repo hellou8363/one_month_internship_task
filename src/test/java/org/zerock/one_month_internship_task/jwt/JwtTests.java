@@ -1,14 +1,17 @@
 package org.zerock.one_month_internship_task.jwt;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.zerock.one_month_internship_task.domain.user.dto.type.AuthoritiesType;
 import org.zerock.one_month_internship_task.infra.security.jwt.JwtHelper;
 
-import static org.springframework.test.util.AssertionErrors.assertNotNull;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
+import java.time.Duration;
+
+import static org.springframework.test.util.AssertionErrors.*;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.yml")
@@ -27,5 +30,18 @@ public class JwtTests {
 
         assertNotNull("token is null", token);
         assertTrue("fail validate token", jwtHelper.validateToken(token));
+    }
+
+    @Test
+    void validateTokenTest() throws InterruptedException {
+        String token = jwtHelper.generateToken(
+                "TestUser",
+                AuthoritiesType.ROLE_USER,
+                Duration.ofSeconds(3)
+        );
+
+        assertNotNull("token is null", token);
+        Thread.sleep(3000);
+        assertFalse("token", jwtHelper.validateToken(token));
     }
 }
