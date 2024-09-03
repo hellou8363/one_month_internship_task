@@ -13,7 +13,7 @@ import org.zerock.one_month_internship_task.domain.user.dto.SignupResponse;
 import org.zerock.one_month_internship_task.domain.user.service.UserService;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     private final UserService userService;
@@ -23,7 +23,7 @@ public class UserController {
     }
 
 
-    @PostMapping("/users/signup")
+    @PostMapping("/signup")
     public ResponseEntity<SignupResponse> signup(
             @RequestBody SignupRequest signupRequest
     ) {
@@ -33,7 +33,7 @@ public class UserController {
         );
     }
 
-    @PostMapping("/users/sign")
+    @PostMapping("/sign")
     public ResponseEntity<SignResponse> sign(
             @RequestBody SignRequest signRequest
     ) {
