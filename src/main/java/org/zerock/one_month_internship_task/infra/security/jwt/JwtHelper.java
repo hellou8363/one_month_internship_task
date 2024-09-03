@@ -27,6 +27,8 @@ public class JwtHelper {
     private String secretKey;
     @Value("${auth.jwt.accessTokenExpirationSeconds}")
     private Long accessTokenExpirationSeconds;
+    @Value("${auth.jwt.refreshTokenExpirationSeconds}")
+    private Long refreshTokenExpirationSeconds;
 
     private static final Logger log = LoggerFactory.getLogger(JwtHelper.class);
 
@@ -61,7 +63,14 @@ public class JwtHelper {
         return generateToken(subject, role, Duration.ofSeconds(accessTokenExpirationSeconds));
     }
 
-    public String generateToken(
+    public String generateRefreshToken(
+            String subject,
+            AuthoritiesType role
+    ) {
+        return generateToken(subject, role, Duration.ofSeconds(refreshTokenExpirationSeconds));
+    }
+
+    private String generateToken(
             String subject,
             AuthoritiesType role,
             Duration expirationPeriod
