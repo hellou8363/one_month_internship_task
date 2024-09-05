@@ -28,6 +28,13 @@ public class UserService {
     }
 
     public SignupResponse signup(SignupRequest signupRequest) {
+
+        boolean isExist = userRepository.findByUsername(signupRequest.username()).isEmpty();
+
+        if (!isExist) {
+            throw new IllegalArgumentException("이미 존재하는 username입니다.");
+        }
+
         return userRepository.save(
                 new User(
                         signupRequest.username(),
